@@ -1,8 +1,11 @@
 services:
   app:
     build:
-      target: local
       context: ./docker/php
+      target: ${APP_BUILD_TARGET:-local}
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
     ports:
       - 9000:80
 
