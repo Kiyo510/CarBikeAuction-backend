@@ -1,8 +1,9 @@
 services:
   app:
     build:
-      context: ./docker/php
       target: ${APP_BUILD_TARGET:-local}
+      context: .
+      dockerfile: ./docker/php/Dockerfile
       args:
         UID: ${UID:-1000}
         GID: ${GID:-1000}
