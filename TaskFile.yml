@@ -1,0 +1,48 @@
+version: '3.17'
+
+dotenv: [ ".env" ]
+
+tasks:
+  init:
+    desc: "アプリケーションのローカル環境セットアップ"
+    cmds:
+      - task: docker-build
+      - task: docker-up
+      - docker compose exec app cp .env.example .env
+      - docker compose exec app composer install
+      - docker compose exec app php artisan key:generate
+      - docker compose exec app php artisan storage:link
+      - docker compose exec app chmod -R 777 storage bootstrap/cache
+      - task: migrate
+      - task: setup-test
+      - task: migrate-test
+
+  docker-build:
+    desc: "Dockerコンテナのビルドと起動"
+    cmds:
+      - docker compose build
+
+  docker-up:
+    desc: "Dockerコンテナの起動"
+    cmds:
+      - docker compose up -d
+
+  migrate:
+    desc: "マイグレーション実行"
+    cmds:
+      - docker compose exec app php artisan migrate
+
+  setup-test:
+    desc: "ローカルのDBにテスト用環境をセットアップ"
+    cmds:
+      - >
+        docker compose exec db bash -c "
+        PGPASSWORD=${DB_PASSWORD} psql -U ${DB_USERNAME} -h ${DB_HOST} -d ${DB_DATABASE} -tc 
+        \"SELECT 1 FROM pg_database WHERE datname = 'testing';\" | grep -q 1 || 
+        PGPASSWORD=${DB_PASSWORD} psql -U ${DB_USERNAME} -h ${DB_HOST} -d ${DB_DATABASE} -c 
+        \"CREATE DATABASE testing OWNER ${DB_USERNAME};\""
+
+  migrate-test:
+    desc: "テスト用DBへマイグレーションを実行"
+    cmds:
+      - docker compose exec app bash -c "DB_DATABASE=testing php artisan migrate"
