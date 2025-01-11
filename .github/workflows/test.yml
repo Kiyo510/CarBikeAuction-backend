@@ -1,0 +1,92 @@
+name: Test
+
+on:
+  workflow_dispatch:
+  push:
+
+# ワークフローレベルでパーミッションをすべて無効化
+permissions: { }
+
+# デフォルトシェルでパイプエラーを有効化
+defaults:
+  run:
+    shell: bash
+
+# ワークフローが複数起動したら古いワークフローは自動キャンセルする。
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PHP-VERSION: 8.4.2
+  TZ: Asia/Tokyo
+  DB_HOST: 127.0.0.1
+  DB_DATABASE: testing
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        parallelism: [ 2 ]
+        id: [ 0, 1 ]
+
+    services:
+      postgres:
+        image: postgres:17.2-bullseye
+        env:
+          POSTGRES_USER: car_bike_auction
+          POSTGRES_DB: ${{ env.DB_DATABASE }}
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Run actionlint
+        run: |
+          set -x
+          docker run --rm -v "$(pwd):$(pwd)" -w "$(pwd)" rhysd/actionlint
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@9e72090525849c5e82e596468b86eb55e9cc5401 # v2.32.0
+        with:
+          php-version: ${{ env.PHP-VERSION }}
+          ini-values: date.timezone=${{ env.TZ }}
+          extensions: bcmath zip intl pdo_pgsql
+
+      - name: Copy .env
+        run: cp .env.example .env
+
+      - name: Use Composer Cache
+        id: composer-cache
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Dependencies
+        if: steps.composer-cache.outputs.cache-hit != 'true'
+        run: composer install --quiet --no-interaction --no-ansi --no-scripts --no-progress --prefer-dist
+
+      - name: Generate key
+        run: php artisan key:generate
+
+      - name: Run migration
+        run: DB_DATABASE=${{ env.DB_DATABASE }} php artisan migrate --force
+
+      - name: Run Parallel Tests
+        env:
+          MATRIX_PARALLELISM: ${{ matrix.parallelism }}
+          MATRIX_ID: ${{ matrix.id }}
+        run: |
+          set -x
+          find tests -name '*Test.php' | sort | awk "NR % ${MATRIX_PARALLELISM} == ${MATRIX_ID}" | xargs php ./bin/generate_ci_phpunit_xml.php
+          ./vendor/bin/phpunit --order-by=random --configuration /tmp/ci_phpunit.xml
