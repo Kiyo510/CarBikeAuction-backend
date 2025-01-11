@@ -28,7 +28,7 @@ Close #{issueの番号}
 - 
 
 ## レビューに出す前の簡易チェックリスト
-- https://github.com/Kiyo510/CarBikeAuction-backend/blob/816d74e9ae2c4d96cd61c7bb996cc893b2c894a1/.github/pr_review_check_list.md
+- https://github.com/Kiyo510/CarBikeAuction-backend/blob/084f0d29edf2ae70cb9c3be228ae0d74db557b03/.github/pr_review_check_list.md
 
 ## その他
 
