@@ -1,0 +1,10 @@
+[Date]
+date.timezone = "Asia/Tokyo"
+
+[Session]
+session.use_strict_mode = 1
+session.cookie_httponly = 1
+session.cookie_samesite = Lax
+
+[mbstring]
+mbstring.language = Japanese

@@ -51,20 +51,24 @@ FROM base AS local
 
 RUN \
   pecl install xdebug && \
-  docker-php-ext-enable xdebug
+  docker-php-ext-enable xdebug  && \
+  mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+
+COPY ./docker/php/php.ini-development $PHP_INI_DIR/conf.d/docker-php.ini
 
 #  Cannot install, php_dir for channel "pecl.php.net" is not writeable by the current user というエラーが発生するため、
 #  xdebugのインストール完了後に実行USERを変更する
 USER phper
 
-# TODO: php.iniの開発用設定を追加する
-#COPY "./docker/php/php.ini-development" "$PHP_INI_DIR/php.ini"
+# TODO: #11 Xdebugの設定を追加する
 #COPY "./docker/php/xdebug.ini" "$PHP_INI_DIR/conf.d/xdebug.ini"
 
-# TODO: デプロイ用の設定を追加する
+# TODO: #25 デプロイ用の設定を追加する
 #FROM base AS deploy
 
-#COPY "./docker/php/php.ini-production" "$PHP_INI_DIR/php.ini"
+#RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+#COPY ./docker/php/php.ini-production $PHP_INI_DIR/conf.d/docker-php.ini
 #COPY --chown=phper:phper . /app
 
 #USER phper
