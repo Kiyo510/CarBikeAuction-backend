@@ -60,9 +60,10 @@ COPY ./docker/php/php.ini-development $PHP_INI_DIR/conf.d/docker-php.ini
 #  xdebugのインストール完了後に実行USERを変更する
 USER phper
 
+# TODO: #11 Xdebugの設定を追加する
 #COPY "./docker/php/xdebug.ini" "$PHP_INI_DIR/conf.d/xdebug.ini"
 
-# TODO: デプロイ用の設定を追加する
+# TODO: #25 デプロイ用の設定を追加する
 #FROM base AS deploy
 
 #RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
