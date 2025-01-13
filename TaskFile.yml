@@ -46,3 +46,14 @@ tasks:
     desc: "テスト用DBへマイグレーションを実行"
     cmds:
       - docker compose exec app bash -c "DB_DATABASE=testing php artisan migrate"
+
+  test:
+    desc: "PHPUnitの実行 (テストの順番はランダム) シード値を渡す場合: SEED=1736688982 task test"
+    cmds:
+      - >
+        docker compose exec -e SEED app bash -c '
+        if [ -z "${SEED}" ]; then
+          vendor/bin/phpunit -d memory_limit=-1 --order-by=random --testdox
+        else
+          vendor/bin/phpunit --order-by=random --random-order-seed=${SEED} --testdox
+        fi'
