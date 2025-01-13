@@ -65,7 +65,9 @@ USER phper
 # TODO: デプロイ用の設定を追加する
 #FROM base AS deploy
 
-#COPY "./docker/php/php.ini-production" "$PHP_INI_DIR/php.ini"
+#RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+#COPY ./docker/php/php.ini-production $PHP_INI_DIR/conf.d/docker-php.ini
 #COPY --chown=phper:phper . /app
 
 #USER phper
