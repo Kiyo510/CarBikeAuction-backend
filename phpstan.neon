@@ -1,11 +1,18 @@
 includes:
     - vendor/larastan/larastan/extension.neon
     - vendor/nesbot/carbon/extension.neon
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+    - vendor/phpstan/phpstan-phpunit/rules.neon
+    - vendor/phpstan/phpstan-doctrine/extension.neon
+    - vendor/phpstan/phpstan-doctrine/rules.neon
 
 parameters:
-
+    checkModelProperties: true
+    noEnvCallsOutsideOfConfig: true
     paths:
         - app
+        - tests
 
     # Level 10 is the highest level
     level: 10
