@@ -37,9 +37,9 @@ tasks:
     cmds:
       - >
         docker compose exec db bash -c "
-        PGPASSWORD=${DB_PASSWORD} psql -U ${DB_USERNAME} -h ${DB_HOST} -d ${DB_DATABASE} -tc 
-        \"SELECT 1 FROM pg_database WHERE datname = 'testing';\" | grep -q 1 || 
-        PGPASSWORD=${DB_PASSWORD} psql -U ${DB_USERNAME} -h ${DB_HOST} -d ${DB_DATABASE} -c 
+        PGPASSWORD=${DB_PASSWORD} psql -U ${DB_USERNAME} -h ${DB_HOST} -d ${DB_DATABASE} -tc
+        \"SELECT 1 FROM pg_database WHERE datname = 'testing';\" | grep -q 1 ||
+        PGPASSWORD=${DB_PASSWORD} psql -U ${DB_USERNAME} -h ${DB_HOST} -d ${DB_DATABASE} -c
         \"CREATE DATABASE testing OWNER ${DB_USERNAME};\""
 
   migrate-test:
@@ -57,3 +57,8 @@ tasks:
         else
           vendor/bin/phpunit --order-by=random --random-order-seed=${SEED} --testdox
         fi'
+
+  larastan:
+    desc: "Larastanの実行"
+    cmds:
+      - docker compose exec app bash -c "vendor/bin/phpstan analyse"
